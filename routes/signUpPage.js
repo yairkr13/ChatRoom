@@ -2,7 +2,7 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET home page. */
+/* GET home page.Chan */
 router.get('/', function(req, res, next) {
     res.render('signUpPage', { title: 'Sign Up Page' });
 });
