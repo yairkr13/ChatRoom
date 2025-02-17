@@ -1,9 +1,10 @@
+//signUpPage.js
 var express = require('express');
 var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    res.render('register', { title: 'Register Page' });
+    res.render('signUpPage', { title: 'Sign Up Page' });
 });
 
 router.post('/', function(req, res, next) {
@@ -11,9 +12,9 @@ router.post('/', function(req, res, next) {
     //פה יהיה בדיקה מול המסד נתונים שהאימייל באמת פנוי.!!!!
     if (firstname === 'ron'){
         //נכניס קוקי עם הפרטים של המשתמש שתקף למשך הזמן שסולנ רשמה
-        res.redirect('/register'); // לעמוד הסיסמאות
+        res.redirect('/signUpPage'); // לעמוד הסיסמאות
     }else{
-        res.redirect('/'); // register
+        res.redirect('/'); // signUpPage
     }
 
     // res.render('register', { title: 'Register Page' });
