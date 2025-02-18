@@ -1,4 +1,48 @@
-//error.ejs
-<h1><%= message %></h1>
-<h2><%= error.status %></h2>
-<pre><%= error.stack %></pre>
+<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שגיאה</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8d7da;
+            color: #721c24;
+            text-align: center;
+            padding: 50px;
+        }
+        .error-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+        h1, h2 {
+            margin: 0;
+        }
+        a {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+<div class="error-container">
+    <h1>⚠️ אופס... משהו השתבש!</h1>
+    <h2>שגיאה <%= error.status || 500 %></h2>
+    <p><%= message %></p>
+    <a href="/">🔙 חזרה לדף הבית</a>
+</div>
+</body>
+</html>
