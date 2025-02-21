@@ -1,0 +1,24 @@
+{
+  "development": {
+    "database": "testdb",
+    "username": "root",
+    "password": "root",
+    "dialect": "mysql",
+    "config": { "dialect": "mysql", "host": "localhost"}
+  },
+  "test": {
+    "database": "testdb",
+    "username": "root",
+    "password": "root",
+    "dialect": "mysql",
+    "config": { "dialect": "mysql", "host": "localhost"}
+  },
+  "production": {
+    "database": "testdb",
+    "username": "root",
+    "password": "root",
+    "dialect": "mysql",
+    "config": { "dialect": "mysql", "host": "localhost"}
+  }
+}
+

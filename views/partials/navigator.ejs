@@ -1,0 +1,66 @@
+<body>
+<div class="position-relative text-center bg-dark py-3">
+    <h1 class="text-light fw-bold">Chat Room</h1>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+
+        <a class="btn btn-outline-primary me-2" href="/">Home</a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+            <% if (loggedIn === true) { %>
+            <a class="btn btn-outline-primary mx-2" type="button" href="/newAd">Post new Ad</a>
+            <% } %>
+
+            <div class="ms-auto"> <!-- Added ms-auto class here -->
+                <% if (loggedIn === true) { %>
+                    <% if (role === 'admin') { %>
+                        <a class="btn btn-primary me-2" type="button" href="/adminPage">Admin Page</a>
+                    <% } %>
+                    <a class="btn btn-primary me-2" type="button" href="/userPage">Personal Area</a>
+                    <a class="btn btn-outline-primary me-2" type="button" href="/users/logout">Logout</a>
+
+
+                <% } else { %>
+                    <a class="btn btn-outline-primary me-2" type="button" href="/">Login</a>
+                    <a class="btn btn-outline-primary me-2" type="button" href="/register">Register</a>
+
+                <% } %>
+
+                <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#myModal">Who am i</button>
+            </div>
+
+        </div>
+
+    </div>
+</nav>
+
+
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title" id="myModalLabel">Personal Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Name:</strong> Yair Krothamer</p>
+                <p><strong>Email:</strong> yairkr@edu.hac.ac.il</p>
+            </div>
+            <div class="modal-footer bg-secondary text-white">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

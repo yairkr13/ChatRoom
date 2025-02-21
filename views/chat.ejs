@@ -1,0 +1,31 @@
+<%- include('partials/header') %>
+
+<div class="container">
+    <h2 class="text-center">Welcome to the Chat</h2>
+
+    <% if (user) { %>
+        <p class="text-center">Hello, <%= user.firstName %> <%= user.lastName %>!</p>
+    <% } %>
+
+    <!-- אזור הצ'אט -->
+    <div id="chat-box" class="border p-3" style="height: 300px; overflow-y: auto;">
+        <p>Messages will appear here...</p>
+    </div>
+
+    <!-- טופס לשליחת הודעה -->
+    <form id="chat-form">
+        <input type="text" id="message" class="form-control" placeholder="Type a message..." required>
+        <button type="submit" class="btn btn-primary mt-2">Send</button>
+    </form>
+
+    <!-- כפתור Logout -->
+    <form action="/users/logout" method="POST">
+        <button type="submit">Logout</button>
+    </form>
+
+</div>
+
+<%- include('partials/footer') %>
+
+<!-- קישור לקובץ JavaScript -->
+<script src="/javascripts/chat.js"></script>

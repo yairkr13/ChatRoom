@@ -1,0 +1,54 @@
+<%- include('partials/header') %>
+<!-- rest of the page -->
+
+<%- include('partials/navigator') %> <!-- Nav bar -->
+
+<% if (typeof success !== "undefined" && success === 'registered') { %>
+    <div class="alert alert-success text-center">
+        Registration successful! You can now log in.
+    </div>
+<% } %>
+
+
+
+<div class="container-fluid p-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+
+            <!-- Alert Box with Bootstrap - Positioned Above the Form -->
+            <% if (errors && errors.login) { %>
+                <div class="alert alert-danger text-center position-fixed w-50 start-50 translate-middle-x" style="top: 100px; z-index: 1050;">
+                    <%= errors.login %>
+                </div>
+            <% } %>
+
+            <div class="card shadow-lg p-4">
+                <h2 class="text-center mb-4">Login</h2>
+                <form action="/users/login" method="post">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email" required value="<%= formData.email || '' %>">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password:</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Register button -->
+<div class="row justify-content-center mt-3">
+    <div class="col-md-6">
+        <p class="text-center mb-3">Don’t have an account yet? <a href="/register">Register for free</a>.</p>
+    </div>
+</div>
+<script src="/javascripts/utils.js"></script>
+
+
+<!-- end of the page -->
+<%- include('partials/footer') %>
