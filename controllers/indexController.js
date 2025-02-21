@@ -1,16 +1,6 @@
 'use strict';
 
 module.exports = {
-
-    /**
-     * Renders the home page view.
-     * @param {Object} req - Express request object.
-     * @param {Object} res - Express response object.
-     */
-    getHomePage(req, res) {
-        res.render('homePage');
-    },
-
     /**
      * Renders the success page view.
      * @param {Object} req - Express request object.
@@ -18,15 +8,6 @@ module.exports = {
      */
     getSuccessPage(req, res) {
         res.render('success');
-    },
-
-    /**
-     * Renders the new ad page view, optionally populating form fields with last ad data.
-     * @param {Object} req - Express request object.
-     * @param {Object} res - Express response object.
-     */
-    async getNewAdPage(req, res) {
-        res.render('newAd', {errors: {}, formData: {}});  // Render the new ad page with empty form data and errors object
     },
 
     /**
