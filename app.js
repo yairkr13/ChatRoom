@@ -16,41 +16,9 @@ const REGISTER = 30 * 1000; // 30 seconds in milliseconds
 let indexRouter = require('./routes/index');
 let usersRouter = require('./routes/users');
 
-
-
 ///////////////////////
 const db = require('./models/index');
-// createt the tables if dont exist
-db.sequelize.sync()
-    .then(async () => {
-      console.log('Database Synced.');
-      return await Promise.all([
-        await db.User.findOrCreate({
-          where: {login: 'admin'},
-          defaults: {login: 'admin', password: 'admin', role: "admin"}
-        }),
-        await db.User.findOrCreate({
-          where: {login: 'admin2'},
-          defaults: {login: 'admin2', password: 'admin2', role: "admin"}
-        }),
-        await db.User.findOrCreate({
-          where: {login: 'user'},
-          defaults: {login: 'user', password: 'user', role: "user"}
-        }),
-      ]);
-    }).then(() => {
-  console.log('Admin user created.');
-}).catch((err) => {
-  console.log('Error syncing datebase or creating admin users.');
-  console.log(err);
-});
 
-// enable sessions
-// app.use(session({
-//   secret:"ourSecretSource",
-//   resave: false, // Force save of session for each request
-//   saveUninitialized: false, // Save a session that is new, but has not been modified
-// }));
 app.use(session({
   secret: 'supersecretkey',
   resave: false,
