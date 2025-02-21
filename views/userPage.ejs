@@ -19,28 +19,16 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <a class="btn btn-outline-primary mx-2" type="button" href="/newAd">Post new Ad</a>
-            <div class="ms-auto">
-                    <% if (role === 'admin') { %>
-                        <a class="btn btn-primary me-2" type="button" href="/adminPage">Admin Page</a>
-                    <% } %>
-                    <a class="btn btn-primary me-2" type="button" href="/userPage">Personal Area</a>
-                    <a class="btn btn-outline-primary me-2" type="button" href="/users/logout">Logout</a>
-
-                <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#myModal">Who am i</button>
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-primary me-2" onclick="window.location.href='/users/personal-area'">Personal Area</button>
+                <button class="btn btn-secondary me-2" onclick="window.location.href='/users/logout'">Logout</button>
+                <button class="btn btn-info" onclick="window.location.href='/users/who-am-i'">Who am I</button>
             </div>
+
         </div>
     </div>
 </nav>
 <!-- HTML -->
-
-<div class="container-fluid p-5">
-    <div class="row row-cols-1 row-cols-md-3 g-4" id="ads-container">
-
-
-    </div>
-</div>
-
 
 <!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
