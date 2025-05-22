@@ -95,7 +95,7 @@ module.exports = {
         }
     }
 ,
-
+//try
     async renderSetPasswordPage(req, res) {
         const registerData = req.cookies.registerData ? JSON.parse(req.cookies.registerData) : null;
         const email = registerData ? registerData.email : null;
