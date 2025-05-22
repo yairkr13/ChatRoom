@@ -1,0 +1,55 @@
+/* General styles */
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Chat messages container */
+.messages-container {
+  display: flex;
+  flex-direction: column-reverse;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+/* Message item styling */
+.message-item {
+  margin-bottom: 10px;
+  transition: all 0.3s ease;
+}
+
+.message-item:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* User's own messages */
+.message-item.border-primary {
+  background-color: #f0f7ff;
+}
+
+/* Message input area */
+#message-input {
+  resize: none;
+}
+
+/* Modal styles */
+.modal-header {
+  background-color: #f8f9fa;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-nav {
+    flex-direction: row;
+  }
+  
+  .navbar-nav .nav-item {
+    margin-right: 10px;
+  }
+}

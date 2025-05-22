@@ -1,28 +1,17 @@
-<%- include('partials/header') %>
-<!-- rest of the page -->
+<!DOCTYPE html>
+<html>
+  <%- include('partials/head') %>
+  <body>
+    <%- include('partials/navbar') %>
 
-<%- include('partials/navigator') %> <!-- Nav bar -->
+    <main class="m-4">
+      <div class="alert alert-danger text-center" role="alert">
+        <h1>Uh oh! Something went wrong!</h1>
+        <h2>😢 🤯</h2>
+        <h3><%= msg %></h3>
+      </div>
+    </main>
 
-<div class="container">
-    <div class="error-page text-center">
-
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <img src="../images/error-image.png" alt="Error Image" class="error-image img-fluid" style="max-width: 50%;">
-            </div>
-        </div>
-
-        <div class="error-details mt-4">
-            <h1 class="mb-3">Oops! Something went wrong.</h1>
-            <p class="mb-3">We're sorry, but there was an error processing your request.</p>
-            <p class="mb-3">Please try again later or contact support for assistance.</p>
-            <a href="/" class="btn btn-primary">Back to Homepage</a>
-        </div>
-    </div>
-</div>
-
-
-<!-- end of the page -->
-<%- include('partials/footer') %>
-
-
+    <%- include('partials/footer') %>
+  </body>
+</html>

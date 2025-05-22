@@ -1,50 +1,55 @@
-<%- include('partials/header') %>
-<%- include('partials/navigator') %>
-
-<div class="container-fluid p-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-lg p-4">
-                <h2 class="text-center mb-4">Register</h2>
-                <form action="/users/register" method="post" id="register-form">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email:</label>
-                        <input type="email" class="form-control <%= errors.email ? 'is-invalid' : '' %>" id="email" placeholder="Enter Email" name="email" value="<%= formData.email || '' %>" required>
-                        <div class="invalid-feedback">
-                            <%= errors.email ? errors.email : '' %>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="firstName" class="form-label">First name:</label>
-                        <input type="text" class="form-control <%= errors.firstName ? 'is-invalid' : '' %>" id="firstName" placeholder="Enter first name" name="firstName" value="<%= formData.firstName || '' %>" required>
-                        <div class="invalid-feedback">
-                            <%= errors.firstName ? errors.firstName : '' %>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="lastName" class="form-label">Last name:</label>
-                        <input type="text" class="form-control <%= errors.lastName ? 'is-invalid' : '' %>" id="lastName" placeholder="Enter last name" name="lastName" value="<%= formData.lastName || '' %>" required>
-                        <div class="invalid-feedback">
-                            <%= errors.lastName ? errors.lastName : '' %>
-                        </div>
-                    </div>
-
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary btn-lg">Register</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Register button -->
-<div class="row justify-content-center mt-3">
+<!DOCTYPE html>
+<html>
+<%- include('partials/head') %>
+<body>
+<%- include('partials/navbar') %>
+<main class="container my-5">
+  <div class="row justify-content-center">
     <div class="col-md-6">
-        <p class="text-center mb-3">Already have an account? <a href="/">Login</a>.</p>
-    </div>
-</div>
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h2 class="text-center mb-0">Register</h2>
+        </div>
+        <div class="card-body">
+          <% if (error) { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
 
+          <form action="/register" method="POST" id="registerForm">
+            <div class="mb-3">
+              <label for="firstName" class="form-label">First Name</label>
+              <input type="text" class="form-control" id="firstName" name="firstName" value="<%= firstName || '' %>" pattern="[a-zA-Z]{3,32}" title="First name should be 3-32 letters only" required>
+              <div class="text-danger small" id="firstNameError"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="lastName" class="form-label">Last Name</label>
+              <input type="text" class="form-control" id="lastName" name="lastName" value="<%= lastName || '' %>" pattern="[a-zA-Z]{3,32}" title="Last name should be 3-32 letters only" required>
+              <div class="text-danger small" id="lastNameError"></div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" name="email" value="<%= email || '' %>" required>
+              <div class="text-danger small" id="emailError"></div>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="button" id="continue-btn" class="btn btn-primary">Continue</button>
+            </div>
+          </form>
+
+          <div class="mt-3 text-center">
+            <p>Already have an account? <a href="/login">Login</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
 <%- include('partials/footer') %>
+<script src="/js/validation.js"></script>
+</body>
+</html>
