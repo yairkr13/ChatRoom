@@ -4,7 +4,7 @@ const { Op } = require('sequelize');
 const REGISTER = 30;
 
 /**
- * Check if user is logged in
+ * @desc Middleware to set loggedIn flag in session if not set
  */
 exports.isLoggedIn = (req, res, next) => {
   req.session.loggedIn = req.session.loggedIn || false;
@@ -12,7 +12,7 @@ exports.isLoggedIn = (req, res, next) => {
 };
 
 /**
- * Protect routes - only accessible if logged in
+ * @desc Middleware to protect routes - only allow if logged in
  */
 exports.protectRoute = (req, res, next) => {
   if (!req.session.loggedIn) {
@@ -22,14 +22,14 @@ exports.protectRoute = (req, res, next) => {
 };
 
 /**
- * Render the login page
+ * @desc Render login page or redirect if already logged in
  */
 exports.getLoginPage = (req, res) => {
-  // Redirect to chatroom if already logged in
   if (req.session.loggedIn) {
     return res.redirect('/chatroom');
   }
 
+  // Clear registration cookies on login page load
   res.clearCookie('firstName');
   res.clearCookie('lastName');
   res.clearCookie('email');
@@ -42,26 +42,26 @@ exports.getLoginPage = (req, res) => {
 };
 
 /**
- * Handle login submission
+ * @desc Handle login submission: verify email & password, set session
  */
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user by email (case insensitive)
+    // Find user by email case-insensitively
     const user = await db.User.findOne({
       where: {
         email: { [Op.like]: email.toLowerCase() }
       }
     });
 
-    // Check if user exists and password matches
+    // Validate user existence and password match
     if (!user || user.password !== password) {
       req.session.error = 'Invalid email or password';
       return res.status(400).redirect('/login');
     }
 
-    // Set user session data
+    // Set session user info and loggedIn flag
     req.session.loggedIn = true;
     req.session.user = {
       id: user.id,
@@ -78,23 +78,20 @@ exports.login = async (req, res) => {
 };
 
 /**
- * Handle logout
+ * @desc Handle user logout by destroying session and redirecting
  */
 exports.logout = (req, res) => {
-  // Clear session
   req.session.destroy();
-
-  // Redirect to login page
   res.redirect('/');
 };
 
 /**
- * Render the registration page (first step)
+ * @desc Render the first step registration page with any saved cookies
  */
 exports.getRegisterPage = (req, res) => {
-  let firstName = req.cookies.firstName || '';
-  let lastName = req.cookies.lastName || '';
-  let email = req.cookies.email || '';
+  const firstName = req.cookies.firstName || '';
+  const lastName = req.cookies.lastName || '';
+  const email = req.cookies.email || '';
 
   res.render('register', {
     title: 'Register',
@@ -107,52 +104,45 @@ exports.getRegisterPage = (req, res) => {
 };
 
 /**
- * Handle first step of registration
+ * @desc Handle first step registration - validate inputs, check email uniqueness,
+ *       save data in cookies and redirect to password step
  */
 exports.registerFirstStep = async (req, res) => {
   try {
     let { firstName, lastName, email } = req.body;
 
-    // Sanitize input
     firstName = firstName.trim();
     lastName = lastName.trim();
     email = email.trim().toLowerCase();
 
-    // Validate format
+    // Validate names and email format
     if (!/^[a-zA-Z]{3,32}$/.test(firstName)) {
       req.session.error = 'First name should be 3-32 letters only';
       return res.status(400).redirect('/register');
     }
-
     if (!/^[a-zA-Z]{3,32}$/.test(lastName)) {
       req.session.error = 'Last name should be 3-32 letters only';
       return res.status(400).redirect('/register');
     }
-
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       req.session.error = 'Please provide a valid email address';
       return res.status(400).redirect('/register');
     }
 
-    // Check if email already exists
+    // Check email uniqueness
     const existingUser = await db.User.findOne({
-      where: {
-        email: { [Op.like]: email }
-      }
+      where: { email: { [Op.like]: email } }
     });
-
     if (existingUser) {
       req.session.error = 'This email is already in use, please choose another one';
       return res.status(400).redirect('/register');
     }
 
-    // Store user data in cookies with expiration (30 seconds)
+    // Save data in cookies with 30 second expiration on /register path
     res.cookie('firstName', firstName, { maxAge: REGISTER * 1000, path: '/register' });
     res.cookie('lastName', lastName, { maxAge: REGISTER * 1000, path: '/register' });
     res.cookie('email', email, { maxAge: REGISTER * 1000, path: '/register' });
 
-
-    // Redirect to password form
     res.redirect('/register/password');
   } catch (err) {
     req.session.error = err.message;
@@ -161,21 +151,20 @@ exports.registerFirstStep = async (req, res) => {
 };
 
 /**
- * Handle "Back" action and save data back to cookies
+ * @desc Handle "Back" button from password step, redirects back to first step
  */
 exports.handleBackToRegister = (req, res) => {
   res.redirect('/register');
-}
+};
 
 /**
- * Render the password page (second step of registration)
+ * @desc Render password setup page; redirect to register if cookies missing
  */
 exports.getPasswordPage = (req, res) => {
   const firstName = req.cookies.firstName;
   const lastName = req.cookies.lastName;
   const email = req.cookies.email;
 
-  // אם הקוקיז לא קיימים, החזר לעמוד הרישום
   if (!firstName || !lastName || !email) {
     return res.redirect('/register');
   }
@@ -189,8 +178,9 @@ exports.getPasswordPage = (req, res) => {
     email
   });
 };
+
 /**
- * Handle password submission and complete registration
+ * @desc Handle password submission, validate and complete registration
  */
 exports.registerComplete = async (req, res) => {
   try {
@@ -218,7 +208,6 @@ exports.registerComplete = async (req, res) => {
     const existingUser = await db.User.findOne({
       where: { email: { [Op.like]: email } }
     });
-
     if (existingUser) {
       req.session.error = 'This email is already in use, please choose another one';
       return res.status(400).redirect('/register');
@@ -237,7 +226,6 @@ exports.registerComplete = async (req, res) => {
 
     req.session.success = 'You are now registered';
     res.redirect('/login');
-
   } catch (err) {
     if (err.name === 'SequelizeValidationError') {
       const errors = err.errors.map(e => e.message);

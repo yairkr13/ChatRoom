@@ -25,63 +25,62 @@ app.use(cookieParser());
 
 // Session store setup with Sequelize
 const sessionStore = new SequelizeStore({
-  db: db.sequelize,
-  expiration: 24 * 60 * 60 * 1000, // Session expiration (24 hours)
-  checkExpirationInterval: 15 * 60 * 1000 // Cleanup expired sessions (15 minutes)
+    db: db.sequelize,
+    expiration: 24 * 60 * 60 * 1000, // Session expiration (24 hours)
+    checkExpirationInterval: 15 * 60 * 1000 // Cleanup expired sessions every 15 minutes
 });
 
 // Enable sessions
 app.use(
     session({
-      secret: 'chatroom_secret_key',
-      resave: false,
-      saveUninitialized: false,
-      store: sessionStore,
-      cookie: { maxAge: 24 * 60 * 60 * 1000 } // 24 hours
+        secret: 'chatroom_secret_key',   // Secret key for signing session ID cookie
+        resave: false,                   // Don't save session if unmodified
+        saveUninitialized: false,        // Don't create session until something stored
+        store: sessionStore,             // Use Sequelize-backed session store
+        cookie: { maxAge: 24 * 60 * 60 * 1000 } // Cookie expiration 24 hours
     })
 );
 
-// Set user authentication state for all requests
-// Set user authentication state and handle flash messages
+// Middleware to set user authentication status and flash messages for all views
 app.use((req, res, next) => {
-  // Set default session values
-  req.session.loggedIn = req.session.loggedIn || false;
+    // Ensure loggedIn session flag is defined
+    req.session.loggedIn = req.session.loggedIn || false;
 
-  // Make session data available to views
-  res.locals.isAuth = req.session.loggedIn;
-  res.locals.user = req.session.user || null;
+    // Make auth and user info available in all rendered views
+    res.locals.isAuth = req.session.loggedIn;
+    res.locals.user = req.session.user || null;
 
-  // Move session messages into locals and clear from session
-  res.locals.error = req.session.error || null;
-  res.locals.success = req.session.success || null;
-  delete req.session.error;
-  delete req.session.success;
+    // Transfer flash messages from session to response locals and clear them
+    res.locals.error = req.session.error || null;
+    res.locals.success = req.session.success || null;
+    delete req.session.error;
+    delete req.session.success;
 
-  next();
+    next();
 });
 
-// Landing page route - redirects to login
+// Root route redirects to chatroom if logged in, otherwise to login page
 app.get('/', (req, res) => {
-  if (req.session.loggedIn) {
-    res.redirect('/chatroom');
-  } else {
-    res.redirect('/login');
-  }
+    if (req.session.loggedIn) {
+        res.redirect('/chatroom');
+    } else {
+        res.redirect('/login');
+    }
 });
 
-// Mount routes
+// Mount authentication and chat related routes
 app.use('/', authRoutes);
 app.use('/', chatRoutes);
 
-// 404 Handler
+// Handle 404 - all unmatched routes
 app.all('*', (req, res, next) => {
-  next(new AppError(`Cannot find ${req.originalUrl} on this server!`, 404));
+    next(new AppError(`Cannot find ${req.originalUrl} on this server!`, 404));
 });
 
-// Global error handler
+// Global error handling middleware
 app.use(errorHandler);
 
-// Create session table
+// Sync session store to create session table if it doesn't exist
 sessionStore.sync();
 
 module.exports = app;

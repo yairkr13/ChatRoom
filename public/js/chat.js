@@ -2,191 +2,125 @@ document.addEventListener('DOMContentLoaded', function() {
   const messagesContainer = document.getElementById('messages-container');
   const messageInput = document.getElementById('message-input');
   const sendButton = document.getElementById('send-message');
-  const editMessageModal = new bootstrap.Modal(document.getElementById('editMessageModal'));
+  const editMessageModalEl = document.getElementById('editMessageModal');
+  const editMessageModal = new bootstrap.Modal(editMessageModalEl);
   const editMessageId = document.getElementById('edit-message-id');
   const editMessageContent = document.getElementById('edit-message-content');
   const saveEditButton = document.getElementById('save-edit-message');
   const searchInput = document.getElementById('search-input');
   const searchButton = document.getElementById('search-btn');
-  const logoutButton = document.getElementById('logout-btn');
   const clearSearchButton = document.getElementById('clear-search-btn');
+  const logoutButton = document.getElementById('logout-btn');
+  const deleteConfirmModalEl = document.getElementById('deleteConfirmModal');
+  const deleteConfirmModal = new bootstrap.Modal(deleteConfirmModalEl);
+  const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+  const deleteMessageIdInput = document.getElementById('delete-message-id');
 
   let lastUpdate = Date.now();
   let isPolling = true;
 
-  let allMessages = []; // Store all messages to restore after search
+  let allMessages = [];
   let isSearchActive = false;
 
-  // Function to create a message element
+  // Create message DOM element
   function createMessageElement(message) {
     const isOwnMessage = message.senderId === userId;
 
     const messageItem = document.createElement('div');
-    messageItem.className = `message-item card mb-2 ${isOwnMessage ? 'border-primary' : ''}`;
+    messageItem.className = `message-item card mb-2 ${isOwnMessage ? 'border-success' : 'border-secondary'}`;
     messageItem.dataset.id = message.id;
 
-    // Create message content
     messageItem.innerHTML = `
-      <div class="card-body">
+      <div class="card-body p-3">
         <div class="d-flex justify-content-between align-items-center mb-2">
-          <h6 class="card-subtitle text-muted">
+          <h6 class="card-subtitle text-muted mb-0">
+            <i class="bi bi-person-circle me-1"></i>
             ${message.sender.firstName} ${message.sender.lastName}
           </h6>
-          <small class="text-muted">${new Date(message.createdAt).toLocaleString()}</small>
+          <small class="text-muted">
+            <i class="bi bi-clock"></i> ${new Date(message.createdAt).toLocaleString()}
+          </small>
         </div>
-        <p class="card-text message-content">${message.content}</p>
-        
+        <p class="card-text message-content mb-0">${escapeHtml(message.content)}</p>
         ${isOwnMessage ? `
-          <div class="message-actions mt-2 text-end">
-            <button class="btn btn-sm btn-outline-primary edit-message-btn">Edit</button>
-            <button class="btn btn-sm btn-outline-danger delete-message-btn">Delete</button>
+          <div class="message-actions mt-3 text-end">
+            <button class="btn btn-sm btn-outline-success me-2 edit-message-btn" aria-label="Edit message">
+              <i class="bi bi-pencil-fill"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger delete-message-btn" aria-label="Delete message" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" data-id="${message.id}">
+              <i class="bi bi-trash-fill"></i>
+            </button>
           </div>
         ` : ''}
       </div>
     `;
 
-    // Add event listeners to action buttons if it's the user's message
     if (isOwnMessage) {
-      // Edit button
-      messageItem.querySelector('.edit-message-btn').addEventListener('click', function() {
+      const editBtn = messageItem.querySelector('.edit-message-btn');
+      const deleteBtn = messageItem.querySelector('.delete-message-btn');
+
+      editBtn.addEventListener('click', () => {
         editMessageId.value = message.id;
         editMessageContent.value = message.content;
         editMessageModal.show();
       });
 
-      // Delete button
-      messageItem.querySelector('.delete-message-btn').addEventListener('click', function() {
-        if (confirm('Are you sure you want to delete this message?')) {
-          deleteMessage(message.id);
-        }
+      deleteBtn.addEventListener('click', () => {
+        deleteMessageIdInput.value = message.id;
       });
     }
 
     return messageItem;
   }
 
-  // Function to send a message
-  async function sendMessage(content) {
-    try {
-      const response = await fetch('/api/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ content })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send message');
-      }
-
-      // Clear input after successful send
-      messageInput.value = '';
-
-      // Update messages immediately
-      getMessages();
-    } catch (error) {
-      console.error('Error sending message:', error);
-      alert('Error sending message: ' + error.message);
-    }
+  // Escape HTML special characters to prevent XSS
+  function escapeHtml(text) {
+    const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
   }
 
-  // Function to edit a message
-  async function editMessage(id, content) {
-    try {
-      const response = await fetch(`/api/messages/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ content })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to edit message');
-      }
-
-      // Close modal after successful edit
-      editMessageModal.hide();
-
-      // Update messages
-      getMessages();
-    } catch (error) {
-      console.error('Error editing message:', error);
-      alert('Error editing message: ' + error.message);
-    }
-  }
-
-  // Function to delete a message
-  async function deleteMessage(id) {
-    try {
-      const response = await fetch(`/api/messages/${id}`, {
-        method: 'DELETE'
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete message');
-      }
-
-      // Also remove from allMessages array
-      allMessages = allMessages.filter(message => message.id !== parseInt(id));
-
-      // Remove message from DOM
-      const messageElement = document.querySelector(`.message-item[data-id="${id}"]`);
-      if (messageElement) {
-        messageElement.remove();
-      }
-    } catch (error) {
-      console.error('Error deleting message:', error);
-      alert('Error deleting message: ' + error.message);
-    }
-  }
-
-  // Function to display all messages
+  // Display messages in container
   function displayMessages(messages) {
     messagesContainer.innerHTML = '';
 
     if (messages && messages.length > 0) {
       const fragment = document.createDocumentFragment();
 
-      // Sort messages by creation date (newest first)
-      const sortedMessages = [...messages].sort((a, b) => {
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      });
+      // Sort newest first
+      const sortedMessages = [...messages].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
       sortedMessages.forEach(message => {
-        const messageElement = createMessageElement(message);
-        fragment.appendChild(messageElement);
+        const messageEl = createMessageElement(message);
+        fragment.appendChild(messageEl);
       });
 
       messagesContainer.appendChild(fragment);
     } else {
       messagesContainer.innerHTML = `
-        <div class="text-center p-5">
-          <p class="mb-0">No messages yet. Be the first to send a message!</p>
+        <div class="text-center text-muted py-5">
+          <i class="bi bi-info-circle mb-2" style="font-size: 2rem;"></i>
+          <p class="mb-0 fs-5">No messages yet. Be the first to send a message!</p>
         </div>
       `;
     }
   }
 
-  // Function to get all messages
+  // Fetch all messages initially
   async function getAllMessages() {
     try {
-      const response = await fetch('/api/messages/all');
+      const res = await fetch('/api/messages/all');
+      if (!res.ok) throw new Error('Failed to fetch all messages');
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch all messages');
-      }
-
-      const data = await response.json();
+      const data = await res.json();
 
       if (data.data && data.data.messages) {
         allMessages = data.data.messages;
-
-        // Only display all messages if not in search mode
         if (!isSearchActive) {
           displayMessages(allMessages);
         }
@@ -196,45 +130,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Function to get new messages (polling)
+  // Poll for new messages after lastUpdate
   async function getMessages() {
     if (!isPolling) return;
 
     try {
-      const response = await fetch(`/api/messages?lastUpdate=${lastUpdate}`);
+      const res = await fetch(`/api/messages?lastUpdate=${lastUpdate}`);
+      if (!res.ok) throw new Error('Failed to fetch messages');
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch messages');
-      }
+      const data = await res.json();
 
-      const data = await response.json();
-
-      if (data.data.messages && data.data.messages.length > 0) {
-        // Update timestamp
+      if (data.data && data.data.messages && data.data.messages.length > 0) {
         lastUpdate = data.data.timestamp;
 
         let hasNewMessages = false;
 
-        // Update allMessages
-        data.data.messages.forEach(newMessage => {
-          // Check if message already exists in allMessages
-          const existingIndex = allMessages.findIndex(msg => msg.id === newMessage.id);
-
-          if (existingIndex !== -1) {
-            // Update existing message
-            allMessages[existingIndex] = newMessage;
+        data.data.messages.forEach(newMsg => {
+          const idx = allMessages.findIndex(m => m.id === newMsg.id);
+          if (idx !== -1) {
+            allMessages[idx] = newMsg;
           } else {
-            // Add new message
-            allMessages.push(newMessage);
+            allMessages.push(newMsg);
             hasNewMessages = true;
           }
         });
 
-        // Only update display if not in search mode
         if (!isSearchActive) {
           displayMessages(allMessages);
-
-          // If there are new messages, scroll to top to show them
           if (hasNewMessages && messagesContainer.scrollTo) {
             messagesContainer.scrollTo({ top: 0, behavior: 'smooth' });
           }
@@ -244,33 +166,103 @@ document.addEventListener('DOMContentLoaded', function() {
       console.error('Error fetching messages:', error);
     }
 
-    // Continue polling
     setTimeout(getMessages, POLLING_INTERVAL);
   }
 
-  // Function to search messages
+  // Send a new message
+  async function sendMessage(content) {
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ content })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || 'Failed to send message');
+      }
+
+      messageInput.value = '';
+      await getAllMessages();
+    } catch (error) {
+      console.error('Error sending message:', error);
+      alert('Error sending message: ' + error.message);
+    }
+  }
+
+  // Edit an existing message
+  async function editMessage(id, content) {
+    try {
+      const res = await fetch(`/api/messages/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ content })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || 'Failed to edit message');
+      }
+
+      editMessageModal.hide();
+      await getAllMessages();
+    } catch (error) {
+      console.error('Error editing message:', error);
+      alert('Error editing message: ' + error.message);
+    }
+  }
+
+  // Delete a message by ID
+  async function deleteMessage(id) {
+    try {
+      const res = await fetch(`/api/messages/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || 'Failed to delete message');
+      }
+
+      allMessages = allMessages.filter(m => m.id !== parseInt(id));
+      const msgEl = document.querySelector(`.message-item[data-id="${id}"]`);
+      if (msgEl) msgEl.remove();
+
+      displayMessages(allMessages);
+
+      deleteConfirmModal.hide();
+
+      clearErrorMessage(); // נקה הודעות שגיאה קיימות אחרי הצלחה
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      showErrorMessage('Error deleting message: ' + error.message);
+    }
+  }
+  function showErrorMessage(msg) {
+    const errorEl = document.getElementById('error-message');
+    if (!errorEl) return;
+
+    errorEl.textContent = msg;
+    errorEl.classList.remove('d-none');
+  }
+  function clearErrorMessage() {
+    const errorEl = document.getElementById('error-message');
+    if (!errorEl) return;
+
+    errorEl.textContent = '';
+    errorEl.classList.add('d-none');
+  }
+  // Search messages
   async function searchMessages(term) {
     try {
       isSearchActive = true;
+      const res = await fetch(`/api/messages/search?term=${encodeURIComponent(term)}`);
+      if (!res.ok) throw new Error('Failed to search messages');
 
-      const response = await fetch(`/api/messages/search?term=${encodeURIComponent(term)}`);
+      const data = await res.json();
 
-      if (!response.ok) {
-        throw new Error('Failed to search messages');
-      }
-
-      const data = await response.json();
-
-      // Display search results
-      if (data.data.messages && data.data.messages.length > 0) {
-        // Sort search results by creation date (newest first)
-        const sortedMessages = [...data.data.messages].sort((a, b) => {
-          return new Date(b.createdAt) - new Date(a.createdAt);
-        });
-
-        displayMessages(sortedMessages);
+      if (data.data && data.data.messages && data.data.messages.length > 0) {
+        const sorted = [...data.data.messages].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+        displayMessages(sorted);
       } else {
-        // No results found
         messagesContainer.innerHTML = `
           <div class="text-center p-5">
             <p class="mb-0">No messages found matching "${term}"</p>
@@ -278,12 +270,9 @@ document.addEventListener('DOMContentLoaded', function() {
           </div>
         `;
 
-        // Add event listener to the "Back to Chat" button
-        const backButton = document.getElementById('back-to-chat');
-        if (backButton) {
-          backButton.addEventListener('click', function() {
-            clearSearch();
-          });
+        const backBtn = document.getElementById('back-to-chat');
+        if (backBtn) {
+          backBtn.addEventListener('click', () => clearSearch());
         }
       }
     } catch (error) {
@@ -292,92 +281,91 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  // Function to clear search and display all messages
+  // Clear search mode
   function clearSearch() {
     isSearchActive = false;
     searchInput.value = '';
     displayMessages(allMessages);
   }
 
-  // Event listener for send button
+  // Event listeners
+
+  // Send message on button click
   if (sendButton) {
-    sendButton.addEventListener('click', function() {
+    sendButton.addEventListener('click', () => {
       const content = messageInput.value.trim();
-      if (content) {
-        sendMessage(content);
-      }
+      if (content) sendMessage(content);
     });
   }
 
-  // Event listener for pressing Enter in message input
+  // Send message on Enter key in input
   if (messageInput) {
-    messageInput.addEventListener('keydown', function(event) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
+    messageInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
         const content = messageInput.value.trim();
-        if (content) {
-          sendMessage(content);
-        }
+        if (content) sendMessage(content);
       }
     });
   }
 
-  // Event listener for save edit button
+  // Save edited message
   if (saveEditButton) {
-    saveEditButton.addEventListener('click', function() {
+    saveEditButton.addEventListener('click', () => {
       const id = editMessageId.value;
       const content = editMessageContent.value.trim();
 
-      if (content) {
-        editMessage(id, content);
-      } else {
+      if (!content) {
         alert('Message cannot be empty');
+        return;
       }
+
+      editMessage(id, content);
     });
   }
 
-  // Event listener for search
+  // Search button
   if (searchButton && searchInput) {
-    searchButton.addEventListener('click', function(event) {
-      event.preventDefault();
+    searchButton.addEventListener('click', e => {
+      e.preventDefault();
       const term = searchInput.value.trim();
-
-      if (term) {
-        searchMessages(term);
-      } else {
-        clearSearch();
-      }
+      if (term) searchMessages(term);
+      else clearSearch();
     });
   }
 
-  // Event listener for clear search button
+  // Clear search button
   if (clearSearchButton) {
-    clearSearchButton.addEventListener('click', function(event) {
-      event.preventDefault();
+    clearSearchButton.addEventListener('click', e => {
+      e.preventDefault();
       clearSearch();
     });
   }
 
-  // Event listener for search input - clear search when emptied
+  // Clear search if input emptied
   if (searchInput) {
     searchInput.addEventListener('input', function() {
-      if (this.value.trim() === '' && isSearchActive) {
-        clearSearch();
-      }
+      if (this.value.trim() === '' && isSearchActive) clearSearch();
     });
   }
 
-  // Event listener for logout (For commit)
+  // Logout button (if exists)
   if (logoutButton) {
-    logoutButton.addEventListener('click', function(event) {
-      event.preventDefault();
+    logoutButton.addEventListener('click', e => {
+      e.preventDefault();
       window.location.href = '/logout';
     });
   }
 
-  // Initial loading of all messages
-  getAllMessages();
+  // Confirm delete modal button
+  if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener('click', () => {
+      const id = deleteMessageIdInput.value;
+      if (id) deleteMessage(id);
+    });
+  }
 
-  // Start polling for new messages
+  // Initial load
+  getAllMessages();
   getMessages();
 });
