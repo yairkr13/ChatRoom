@@ -44,4 +44,3 @@ All data is stored locally using the Node.js file system module (`fs`), and the 
 ├── logic/ # Business logic modules
 ├── public/ # Static CSS/JS files
 └── data/ # JSON storage for users and messages
-
