@@ -1,36 +1,47 @@
-# README
+# 💬 Chatroom Web Application
 
-## Personal Information
-**Name:** Yair Krothamer  
-**Email:** yairkr@edu.jmc.ac.il
-
----
-
-## Execution
-This project is a WebStorm-based web application and can be run directly from the IDE.  
-Make sure to have the necessary Node.js environment installed.
-
-To start the project:
-1. Open the project folder in WebStorm.
-2. Install dependencies using `npm install`.
-3. Run the project using the configured run/debug configuration or by executing `npm start` in the terminal.
+A simple real-time chatroom built with **Node.js**, **Express.js**, and **EJS**  
+Created as part of a university exercise to practice RESTful routing, session-based authentication, and modular server-side development.
 
 ---
 
-## Assumptions
-- The site uses the Bootstrap CDN for styling, so an active internet connection is required for proper styling and icons to load.
-- The backend uses Sequelize ORM connected to a database (e.g., PostgreSQL or MySQL), ensure the database is set up and configured properly in the config files before running.
+## 🧩 Project Description
+
+This project demonstrates core concepts of full-stack web development using the Express framework.  
+It allows users to register, log in, and send messages in a shared chatroom interface.  
+All data is stored locally using the Node.js file system module (`fs`), and the server is built with clean route separation and modular logic.
 
 ---
 
-## Project Overview
-- The application is a chatroom web app with user authentication.
-- Users can register, login, and participate in a real-time chat interface.
-- Sessions are managed using express-session with Sequelize session store.
-- Validation is implemented both client-side (JavaScript) and server-side (Sequelize models and Express controllers).
+## ✨ Features
+
+- 🧑‍💻 **User Registration & Login** – with validation and secure session management
+- 📦 **File-based Data Storage** – no database required
+- 🧠 **Modular Code Structure** – routes, views, and logic separated
+- 🌐 **Dynamic Views** – rendered using EJS templates
+- 🔁 **Real-time Message Display** – via periodic client-side polling
+- 🎨 **Responsive UI** – styled with Bootstrap
 
 ---
 
-## Contact
-For any questions or support, please contact:  
-**Yair Krothamer** – yairkr@edu.jmc.ac.il  
+## 🛠️ Technologies Used
+
+- Node.js  
+- Express.js  
+- EJS (Embedded JavaScript templating)  
+- express-session  
+- Bootstrap 5  
+- File System (fs)  
+
+---
+
+## 📁 Folder Structure
+
+📦 chatroom-express
+├── app.js # Main entry point
+├── routes/ # Route handlers (home, auth, chat)
+├── views/ # EJS template files
+├── logic/ # Business logic modules
+├── public/ # Static CSS/JS files
+└── data/ # JSON storage for users and messages
+
